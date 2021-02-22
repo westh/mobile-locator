@@ -9,7 +9,12 @@ function parseCell(info) {
   const result = {};
   const arr = info.split(',');
   if (arr.length === 4) {
-    [result.mcc, result.mnc, result.lac, result.cid] = arr;
+    [
+      result.mobileCountryCode,
+      result.mobileNetworkCode,
+      result.locationAreaCode,
+      result.cellId,
+    ] = arr;
   }
   return result;
 }
@@ -36,9 +41,15 @@ function setup() {
     )
     .option(
       '-e, --engine <engine>',
-      'Geolocation service engine. {cellocation, google, gpsspg, haoservice, mozilla, mylnikov, opencellid, unwiredlabs, yandex}. Default: google',
-      /^(cellocation|google|gpsspg|haoservice|mozilla|mylnikov|opencellid|unwiredlabs|yandex)$/i,
+      'Geolocation service engine. {cellocation, google, haoservice, mozilla, mylnikov, unwiredlabs, yandex}. Default: google',
+      /^(cellocation|google|haoservice|mozilla|mylnikov|unwiredlabs|yandex)$/i,
       'google',
+    )
+    .option('-s, --signalStrength <number>', 'Signal strength [dBm], e.g. "-75".')
+    .option(
+      '-r, --radio <radioType>',
+      'Radio type/access technology. {gsm, cdma, wcdma, lte}. e.g. "lte".',
+      /^(gsm|cdma|wcdma|lte)$/i,
     )
     .option('-a, --arguments <arguments>', 'Arguments for geolocation engine. e.g. "key:XXX,oid:123".', parseArguments)
     .option(
@@ -65,9 +76,9 @@ function main() {
   const locate = api(program.engine, program.arguments);
   if (program.cell) {
     if (program.verbose) {
-      console.log('Cell: %j', program.cell);
+      console.log('cellInfo: %j', { ...program.cell, signalStrength: program.signalStrength });
     }
-    locate(program.cell)
+    locate({ ...program.cell, signalStrength: program.signalStrength, accessTechnology: program.radio })
       .then((location) => {
         if (program.verbose || program.map) {
           //  Verbose or need to show a map url

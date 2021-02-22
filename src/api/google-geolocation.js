@@ -12,7 +12,14 @@ class GoogleGeolocation extends Base {
     }
   }
 
-  getRequestSettings(cell) {
+  getRequestSettings({
+    cellId,
+    locationAreaCode,
+    mobileCountryCode,
+    mobileNetworkCode,
+    signalStrength,
+    accessTechnology,
+  }) {
     return {
       method: 'POST',
       uri: API,
@@ -20,12 +27,14 @@ class GoogleGeolocation extends Base {
         key: this.key,
       },
       json: {
+        ...(accessTechnology && { radioType: accessTechnology }),
         considerIp: false,
         cellTowers: [{
-          cellId: cell.cid,
-          locationAreaCode: cell.lac,
-          mobileCountryCode: cell.mcc,
-          mobileNetworkCode: cell.mnc,
+          cellId,
+          locationAreaCode,
+          mobileCountryCode,
+          mobileNetworkCode,
+          ...(signalStrength && { signalStrength }),
         }],
       },
     };
